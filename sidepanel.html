@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PageSpeak AI Sidekick</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="sp-header">
+    <h1>AI Sidekick</h1>
+    <div class="sp-header-actions">
+      <button id="btn-clear-context" class="sp-header-btn" title="Clear text context" aria-label="Clear text context">Clear</button>
+      <button id="btn-new-chat" class="sp-header-btn" title="Start new conversation" aria-label="Start new conversation">New Chat</button>
+    </div>
+  </header>
+
+  <!-- Tier 1 Notice (shown when AI is disabled) -->
+  <div id="tier-notice" class="sp-tier-notice hidden">
+    AI features are disabled.<br>
+    Enable them in the extension popup under the AI section.<br>
+    Choose Local AI (Ollama) or Cloud AI (Claude).
+  </div>
+
+  <!-- Context Bar (shows what text is loaded) -->
+  <div id="context-bar" class="sp-context-bar">
+    <div class="sp-context-label">Reading context loaded</div>
+    <div id="context-preview" class="sp-context-preview"></div>
+  </div>
+
+  <!-- Persona Lens Selector -->
+  <div id="lens-selector" class="sp-lens-selector">
+    <label for="lens-select" class="sp-lens-label">Lens:</label>
+    <select id="lens-select" class="sp-lens-select" aria-label="Select persona lens">
+      <option value="">None (default)</option>
+    </select>
+  </div>
+
+  <!-- Quick Action Buttons -->
+  <div id="quick-actions" class="sp-quick-actions">
+    <button class="sp-quick-btn" data-action="summarize" aria-label="Summarize the text">Summarize</button>
+    <button class="sp-quick-btn" data-action="explain" aria-label="Explain simply">Explain Simply</button>
+    <button class="sp-quick-btn" data-action="simplify" aria-label="Simplify the text">Simplify</button>
+    <button class="sp-quick-btn" data-action="main-point" aria-label="Get the main point">Main Point</button>
+    <button class="sp-quick-btn" data-action="key-terms" aria-label="Extract key terms">Key Terms</button>
+  </div>
+
+  <!-- Chat Messages -->
+  <div id="messages" class="sp-messages" role="log" aria-label="Chat messages"></div>
+
+  <!-- Input Area -->
+  <div class="sp-input-area">
+    <textarea
+      id="chat-input"
+      class="sp-input"
+      placeholder="Ask about what you read..."
+      rows="1"
+      aria-label="Ask a question about the text"
+    ></textarea>
+    <button id="btn-send" class="sp-send-btn" title="Send message" aria-label="Send message">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+      </svg>
+    </button>
+  </div>
+
+  <script src="lib/sanitizer.js"></script>
+  <script src="sidepanel.js"></script>
+</body>
+</html>

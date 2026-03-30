@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PageSpeak PDF Reader</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f5; color: #1a1a1a; line-height: 1.8;
+    }
+
+    .pdf-header {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 20px; background: #00897b; color: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .pdf-header h1 { font-size: 15px; font-weight: 600; }
+    .pdf-header-info { font-size: 12px; opacity: 0.8; }
+    .pdf-actions { display: flex; gap: 8px; }
+    .pdf-btn {
+      padding: 6px 14px; border: none; border-radius: 4px;
+      background: rgba(255,255,255,0.2); color: #fff; font-size: 12px;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .pdf-btn:hover { background: rgba(255,255,255,0.35); }
+    .pdf-btn-primary { background: #fff; color: #00897b; font-weight: 600; }
+    .pdf-btn-primary:hover { background: #e0f2f1; }
+
+    .pdf-loading {
+      text-align: center; padding: 60px 20px; color: #666;
+    }
+    .pdf-loading .spinner {
+      width: 40px; height: 40px; border: 4px solid #e0e0e0;
+      border-top-color: #00897b; border-radius: 50%;
+      animation: spin 0.8s linear infinite; margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .pdf-error {
+      text-align: center; padding: 60px 20px; color: #c62828;
+    }
+
+    .pdf-content {
+      max-width: 800px; margin: 0 auto; padding: 30px 40px;
+    }
+
+    .pdf-page {
+      background: #fff; padding: 40px; margin-bottom: 20px;
+      border-radius: 4px; box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      font-size: 16px;
+    }
+
+    .pdf-page-header {
+      font-size: 11px; color: #999; text-transform: uppercase;
+      letter-spacing: 0.5px; margin-bottom: 16px; padding-bottom: 8px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .pdf-page p {
+      margin-bottom: 12px; text-align: justify;
+    }
+  </style>
+</head>
+<body>
+  <header class="pdf-header">
+    <div>
+      <h1>PageSpeak PDF Reader</h1>
+      <div class="pdf-header-info" id="pdf-info">Loading...</div>
+    </div>
+    <div class="pdf-actions">
+      <button class="pdf-btn pdf-btn-primary" id="btn-read-all" disabled>Read Entire PDF</button>
+      <button class="pdf-btn" id="btn-read-selection" disabled>Read Selection</button>
+    </div>
+  </header>
+
+  <div id="pdf-loading" class="pdf-loading">
+    <div class="spinner"></div>
+    <p>Extracting text from PDF...</p>
+  </div>
+
+  <div id="pdf-error" class="pdf-error" style="display:none"></div>
+
+  <div id="pdf-content" class="pdf-content" style="display:none"></div>
+
+  <script src="lib/pdf.min.js"></script>
+  <script>
+    'use strict';
+
+    const pdfContent = document.getElementById('pdf-content');
+    const pdfLoading = document.getElementById('pdf-loading');
+    const pdfError = document.getElementById('pdf-error');
+    const pdfInfo = document.getElementById('pdf-info');
+    const btnReadAll = document.getElementById('btn-read-all');
+    const btnReadSelection = document.getElementById('btn-read-selection');
+
+    // Security: max pages to extract (prevents browser freeze on huge PDFs)
+    const MAX_PAGES = 500;
+
+    // Get PDF URL from query parameter
+    const params = new URLSearchParams(window.location.search);
+    const pdfUrl = params.get('url');
+
+    if (typeof pdfjsLib === 'undefined') {
+      showError('PDF reader library failed to load. Try reloading the page.');
+    } else if (!pdfUrl) {
+      showError('No PDF URL provided.');
+    } else if (!isValidPdfUrl(pdfUrl)) {
+      showError('Invalid PDF URL. Only HTTP, HTTPS, and local file URLs are supported.');
+    } else {
+      loadPDF(pdfUrl);
+    }
+
+    /**
+     * Validate the PDF URL — only allow http, https, file, and blob protocols.
+     */
+    function isValidPdfUrl(url) {
+      try {
+        const parsed = new URL(url);
+        return ['http:', 'https:', 'file:', 'blob:'].includes(parsed.protocol);
+      } catch (e) {
+        return false;
+      }
+    }
+
+    async function loadPDF(url) {
+      try {
+        // Configure pdf.js worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = chrome.runtime.getURL('lib/pdf.worker.min.js');
+
+        const loadingTask = pdfjsLib.getDocument(url);
+        const pdf = await loadingTask.promise;
+
+        const pageCount = Math.min(pdf.numPages, MAX_PAGES);
+        const truncated = pdf.numPages > MAX_PAGES;
+        pdfInfo.textContent = pdf.numPages + ' pages' + (truncated ? ` (showing first ${MAX_PAGES})` : '');
+        let allText = '';
+
+        for (let i = 1; i <= pageCount; i++) {
+          const page = await pdf.getPage(i);
+          const textContent = await page.getTextContent();
+
+          // Build text from items
+          let pageText = '';
+          let lastY = null;
+
+          for (const item of textContent.items) {
+            if (item.str === undefined) continue;
+
+            // Detect line breaks by Y position change
+            if (lastY !== null && Math.abs(item.transform[5] - lastY) > 5) {
+              pageText += '\n';
+            }
+            pageText += item.str;
+            lastY = item.transform[5];
+          }
+
+          // Create page element
+          const pageEl = document.createElement('div');
+          pageEl.className = 'pdf-page';
+
+          const header = document.createElement('div');
+          header.className = 'pdf-page-header';
+          header.textContent = 'Page ' + i + ' of ' + pdf.numPages;
+          pageEl.appendChild(header);
+
+          // Split into paragraphs (double newlines)
+          const paragraphs = pageText.split(/\n{2,}/);
+          for (const para of paragraphs) {
+            const trimmed = para.replace(/\n/g, ' ').trim();
+            if (!trimmed) continue;
+
+            const p = document.createElement('p');
+            p.textContent = trimmed;
+            pageEl.appendChild(p);
+          }
+
+          pdfContent.appendChild(pageEl);
+          allText += pageText + '\n\n';
+        }
+
+        pdfLoading.style.display = 'none';
+        pdfContent.style.display = 'block';
+        btnReadAll.disabled = false;
+        btnReadSelection.disabled = false;
+
+        // Store full text for "Read All"
+        btnReadAll.addEventListener('click', () => {
+          chrome.runtime.sendMessage({ type: 'START_READING', text: allText.trim() });
+        });
+
+        btnReadSelection.addEventListener('click', () => {
+          const selection = window.getSelection();
+          const text = selection ? selection.toString().trim() : '';
+          if (text) {
+            chrome.runtime.sendMessage({ type: 'START_READING', text });
+          }
+        });
+
+      } catch (err) {
+        showError('Could not read PDF: ' + err.message);
+      }
+    }
+
+    function showError(msg) {
+      pdfLoading.style.display = 'none';
+      pdfError.style.display = 'block';
+      pdfError.textContent = msg;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+/* ============================================================
+   PageSpeak Popup Styles — Tabbed Settings Dashboard
+   ============================================================ */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  width: 340px;
+  max-height: 580px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  color: #1a1a1a;
+  background: #ffffff;
+  overflow-y: auto;
+}
+
+.popup-container { padding: 12px 16px 16px; }
+.hidden { display: none !important; }
+
+/* --- Header --- */
+.popup-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #00897b;
+}
+.popup-title { font-size: 18px; font-weight: 700; color: #00897b; }
+.popup-version { font-size: 11px; color: #888; }
+
+/* --- Reading Status --- */
+.status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  background: #e0f2f1;
+  border-radius: 6px;
+  border: 1px solid #b2dfdb;
+}
+.status-bar.hidden { display: none; }
+#status-text { font-size: 13px; font-weight: 600; color: #00695c; }
+.status-controls { display: flex; gap: 4px; }
+.icon-btn {
+  width: 28px; height: 28px; border: none; border-radius: 4px;
+  background: #00897b; color: #fff; font-size: 12px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.icon-btn:hover { background: #00695c; }
+.icon-btn:focus-visible { outline: 2px solid #00897b; outline-offset: 2px; }
+.icon-btn.hidden { display: none; }
+
+/* --- Tabs --- */
+.tab-nav {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 12px;
+  border-bottom: 2px solid #e0e0e0;
+}
+.tab-btn {
+  flex: 1;
+  padding: 8px 4px;
+  border: none;
+  background: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: #888;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.15s, border-color 0.15s;
+}
+.tab-btn:hover { color: #00897b; }
+.tab-btn.active { color: #00897b; border-bottom-color: #00897b; }
+.tab-btn:focus-visible { outline: 2px solid #00897b; outline-offset: -2px; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* --- Setting Groups --- */
+.setting-group { margin-bottom: 12px; }
+.setting-label {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 13px; font-weight: 600; color: #333; margin-bottom: 5px;
+}
+.setting-value { font-weight: 400; color: #00897b; font-size: 13px; min-width: 40px; text-align: right; }
+.setting-row { display: flex; align-items: center; justify-content: space-between; }
+
+/* --- Controls --- */
+.setting-control {
+  width: 100%; padding: 7px 10px; border: 1px solid #ccc; border-radius: 6px;
+  font-size: 13px; background: #fafafa; color: #1a1a1a; font-family: inherit;
+  cursor: pointer; transition: border-color 0.15s;
+}
+.setting-control:hover { border-color: #00897b; }
+.setting-control:focus-visible { outline: none; border-color: #00897b; box-shadow: 0 0 0 2px rgba(0,137,123,0.2); }
+
+textarea.setting-control { resize: vertical; min-height: 60px; cursor: text; }
+
+/* --- Sliders --- */
+.setting-slider {
+  width: 100%; height: 6px; -webkit-appearance: none; appearance: none;
+  background: #e0e0e0; border-radius: 3px; outline: none; cursor: pointer;
+}
+.setting-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none; width: 18px; height: 18px;
+  border-radius: 50%; background: #00897b; border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2); cursor: pointer;
+}
+.setting-slider::-webkit-slider-thumb:hover { background: #00695c; }
+.setting-slider:focus-visible { outline: 2px solid #00897b; outline-offset: 4px; border-radius: 3px; }
+
+/* --- Divider & Section Titles --- */
+.setting-divider { border: none; border-top: 1px solid #eee; margin: 12px 0 8px; }
+.section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #00897b; margin-bottom: 8px; }
+
+/* --- Toggle Switch --- */
+.toggle-switch { position: relative; display: inline-block; width: 40px; height: 22px; cursor: pointer; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider { position: absolute; inset: 0; background: #ccc; border-radius: 22px; transition: background 0.2s; }
+.toggle-slider::before { content: ''; position: absolute; width: 16px; height: 16px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: transform 0.2s; }
+.toggle-switch input:checked + .toggle-slider { background: #00897b; }
+.toggle-switch input:checked + .toggle-slider::before { transform: translateX(18px); }
+.toggle-switch input:focus-visible + .toggle-slider { outline: 2px solid #00897b; outline-offset: 2px; }
+
+/* --- Color Picker --- */
+.color-picker { display: flex; gap: 6px; margin-top: 4px; }
+.color-swatch { width: 26px; height: 26px; border: 2px solid transparent; border-radius: 50%; cursor: pointer; transition: border-color 0.15s, transform 0.15s; }
+.color-swatch:hover { transform: scale(1.15); }
+.color-swatch.active { border-color: #333; box-shadow: 0 0 0 2px rgba(0,0,0,0.15); }
+.color-swatch:focus-visible { outline: 2px solid #00897b; outline-offset: 2px; }
+
+/* --- Hints --- */
+.setting-hint { font-size: 11px; color: #888; margin-top: 4px; line-height: 1.4; }
+
+/* --- Keyboard Shortcuts --- */
+.shortcut-info { margin-top: 12px; padding-top: 10px; border-top: 1px solid #eee; }
+.shortcut-info p { font-size: 12px; color: #666; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+kbd { display: inline-block; padding: 2px 6px; font-family: 'SFMono-Regular','Consolas',monospace; font-size: 11px; color: #333; background: #f0f0f0; border: 1px solid #ccc; border-radius: 3px; min-width: 100px; text-align: center; }
+
+/* --- Persona Lenses --- */
+.lens-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+.lens-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 10px; background: #f5f5f5; border-radius: 6px; font-size: 12px;
+}
+.lens-item-name { font-weight: 600; color: #333; flex: 1; }
+.lens-item-builtin { font-size: 10px; color: #888; margin-left: 4px; }
+.lens-item-actions { display: flex; gap: 4px; }
+.lens-del-btn {
+  background: none; border: none; color: #c62828; font-size: 14px;
+  cursor: pointer; padding: 2px 4px; border-radius: 3px; transition: background 0.15s;
+}
+.lens-del-btn:hover { background: #ffebee; }
+
+.lens-form { margin-top: 8px; display: flex; flex-direction: column; gap: 6px; }
+.lens-textarea { min-height: 60px; font-size: 12px; }
+.lens-form-actions { display: flex; gap: 6px; }
+
+/* --- Buttons --- */
+.btn-primary {
+  padding: 6px 14px; border: none; border-radius: 6px; background: #00897b;
+  color: #fff; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.15s;
+}
+.btn-primary:hover { background: #00695c; }
+.btn-secondary {
+  padding: 6px 14px; border: 1px solid #ccc; border-radius: 6px; background: #fff;
+  color: #333; font-size: 12px; cursor: pointer; transition: border-color 0.15s;
+}
+.btn-secondary:hover { border-color: #00897b; color: #00897b; }
+.btn-danger {
+  width: 100%; padding: 8px; border: 1px solid #ef9a9a; border-radius: 6px;
+  background: #fff; color: #c62828; font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: background 0.15s;
+}
+.btn-danger:hover { background: #ffebee; }
+.btn-link { background: none; border: none; color: #00897b; font-size: 11px; cursor: pointer; text-decoration: underline; padding: 4px 0; }
+.btn-link:hover { color: #00695c; }
+.btn-row { display: flex; gap: 8px; margin-bottom: 8px; }
+
+/* --- Stats --- */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+.stat-item { text-align: center; padding: 10px 8px; background: #f5f5f5; border-radius: 6px; }
+.stat-value { display: block; font-size: 20px; font-weight: 700; color: #00897b; }
+.stat-label { display: block; font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+/* --- About --- */
+.about-info { text-align: center; padding: 8px 0; }
+.about-info p { margin-bottom: 4px; }
