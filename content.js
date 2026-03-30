@@ -609,9 +609,22 @@ function handleSelectionChange() {
         if (selection.rangeCount > 0) {
           const range = selection.getRangeAt(0);
           const rect = range.getBoundingClientRect();
-          // Only show if we have a valid position (rect can be 0,0 in edge cases)
           if (rect.width > 0 || rect.height > 0) {
             showFloatingButton(rect.right, rect.bottom);
+          } else {
+            // SPA fallback: rect can be 0x0 during React re-renders.
+            // Retry once after a short delay to let the DOM settle.
+            setTimeout(() => {
+              try {
+                const sel = window.getSelection();
+                if (sel && sel.toString().trim() && sel.rangeCount > 0) {
+                  const r = sel.getRangeAt(0).getBoundingClientRect();
+                  if (r.width > 0 || r.height > 0) {
+                    showFloatingButton(r.right, r.bottom);
+                  }
+                }
+              } catch (_) { /* ignore */ }
+            }, 50);
           }
         }
       } else if (!text) {
