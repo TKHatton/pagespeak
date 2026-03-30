@@ -1,0 +1,82 @@
+{
+  "manifest_version": 3,
+  "name": "PageSpeak",
+  "version": "1.0.0",
+  "description": "Dyslexia-first TTS reader with AI comprehension — read any webpage aloud with word tracking, focus lens, and an AI sidekick.",
+  "minimum_chrome_version": "120",
+
+  "permissions": [
+    "activeTab",
+    "tts",
+    "storage",
+    "sidePanel",
+    "contextMenus",
+    "scripting"
+  ],
+
+  "optional_host_permissions": [
+    "https://api.anthropic.com/*",
+    "http://localhost/*",
+    "http://127.0.0.1/*"
+  ],
+
+  "background": {
+    "service_worker": "service-worker.js"
+  },
+
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "js": ["lib/text-extractor.js", "content.js"],
+    "css": ["content.css"],
+    "run_at": "document_idle"
+  }],
+
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png",
+      "128": "icons/icon-128.png"
+    }
+  },
+
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+
+  "commands": {
+    "read-selection": {
+      "suggested_key": {
+        "default": "Alt+S",
+        "mac": "Alt+S"
+      },
+      "description": "Read selected text aloud"
+    },
+    "toggle-reading": {
+      "suggested_key": {
+        "default": "Alt+P",
+        "mac": "Alt+P"
+      },
+      "description": "Pause or resume reading"
+    }
+  },
+
+  "web_accessible_resources": [{
+    "resources": [
+      "fonts/OpenDyslexic-Regular.woff2",
+      "fonts/AtkinsonHyperlegible-Regular.woff2",
+      "fonts/Lexend-Regular.woff2"
+    ],
+    "matches": ["<all_urls>"]
+  }],
+
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'none'"
+  }
+}

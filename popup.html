@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PageSpeak Settings</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <header class="popup-header">
+      <h1 class="popup-title">PageSpeak</h1>
+      <span class="popup-version">v1.0.0</span>
+    </header>
+
+    <!-- Reading Status -->
+    <div id="reading-status" class="status-bar hidden">
+      <span id="status-text">Reading...</span>
+      <div class="status-controls">
+        <button id="btn-pause" class="icon-btn" title="Pause">&#10074;&#10074;</button>
+        <button id="btn-resume" class="icon-btn hidden" title="Resume">&#9654;</button>
+        <button id="btn-stop" class="icon-btn" title="Stop">&#9632;</button>
+      </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <nav class="tab-nav" role="tablist" aria-label="Settings sections">
+      <button class="tab-btn active" data-tab="reading" role="tab" aria-selected="true" aria-controls="tab-reading">Reading</button>
+      <button class="tab-btn" data-tab="appearance" role="tab" aria-selected="false" aria-controls="tab-appearance">Look</button>
+      <button class="tab-btn" data-tab="ai" role="tab" aria-selected="false" aria-controls="tab-ai">AI</button>
+      <button class="tab-btn" data-tab="about" role="tab" aria-selected="false" aria-controls="tab-about">About</button>
+    </nav>
+
+    <!-- ==================== READING TAB ==================== -->
+    <div id="tab-reading" class="tab-panel active" role="tabpanel">
+      <section class="setting-group">
+        <label for="voice-select" class="setting-label">Voice</label>
+        <select id="voice-select" class="setting-control">
+          <option value="">System Default</option>
+        </select>
+      </section>
+
+      <section class="setting-group">
+        <label for="speed-slider" class="setting-label">
+          Speed <span id="speed-value" class="setting-value">1.0x</span>
+        </label>
+        <input type="range" id="speed-slider" class="setting-slider" min="0.5" max="3.0" step="0.1" value="1.0">
+      </section>
+
+      <section class="setting-group">
+        <label for="pitch-slider" class="setting-label">
+          Pitch <span id="pitch-value" class="setting-value">1.0</span>
+        </label>
+        <input type="range" id="pitch-slider" class="setting-slider" min="0.5" max="2.0" step="0.1" value="1.0">
+      </section>
+
+      <section class="setting-group">
+        <label for="volume-slider" class="setting-label">
+          Volume <span id="volume-value" class="setting-value">100%</span>
+        </label>
+        <input type="range" id="volume-slider" class="setting-slider" min="0" max="1.0" step="0.05" value="1.0">
+      </section>
+
+      <section class="shortcut-info">
+        <p><kbd>Alt+S</kbd> Read selected text</p>
+        <p><kbd>Alt+P</kbd> Pause / Resume</p>
+      </section>
+    </div>
+
+    <!-- ==================== APPEARANCE TAB ==================== -->
+    <div id="tab-appearance" class="tab-panel" role="tabpanel">
+      <section class="setting-group setting-row">
+        <label for="tracking-toggle" class="setting-label">Word Tracking</label>
+        <label class="toggle-switch"><input type="checkbox" id="tracking-toggle" checked><span class="toggle-slider"></span></label>
+      </section>
+
+      <section class="setting-group">
+        <label class="setting-label">Highlight Color</label>
+        <div class="color-picker" id="color-picker">
+          <button class="color-swatch active" data-color="#FFFF00" title="Yellow" style="background:#FFFF00"></button>
+          <button class="color-swatch" data-color="#90CAF9" title="Blue" style="background:#90CAF9"></button>
+          <button class="color-swatch" data-color="#A5D6A7" title="Green" style="background:#A5D6A7"></button>
+          <button class="color-swatch" data-color="#F48FB1" title="Pink" style="background:#F48FB1"></button>
+          <button class="color-swatch" data-color="#FFCC80" title="Orange" style="background:#FFCC80"></button>
+          <button class="color-swatch" data-color="#CE93D8" title="Purple" style="background:#CE93D8"></button>
+        </div>
+      </section>
+
+      <hr class="setting-divider">
+
+      <section class="setting-group setting-row">
+        <label for="focus-lens-toggle" class="setting-label">Focus Lens</label>
+        <label class="toggle-switch"><input type="checkbox" id="focus-lens-toggle"><span class="toggle-slider"></span></label>
+      </section>
+
+      <section class="setting-group">
+        <label for="lens-size-select" class="setting-label">Lens Size</label>
+        <select id="lens-size-select" class="setting-control">
+          <option value="small">Small</option>
+          <option value="medium" selected>Medium</option>
+          <option value="large">Large</option>
+          <option value="extra-large">Extra Large</option>
+        </select>
+      </section>
+
+      <section class="setting-group setting-row">
+        <label for="dimming-toggle" class="setting-label">Distraction Dimming</label>
+        <label class="toggle-switch"><input type="checkbox" id="dimming-toggle"><span class="toggle-slider"></span></label>
+      </section>
+
+      <section class="setting-group setting-row">
+        <label for="ruler-toggle" class="setting-label">Reading Ruler</label>
+        <label class="toggle-switch"><input type="checkbox" id="ruler-toggle"><span class="toggle-slider"></span></label>
+      </section>
+
+      <section class="setting-group setting-row">
+        <label for="overlay-toggle" class="setting-label">Color Overlay</label>
+        <label class="toggle-switch"><input type="checkbox" id="overlay-toggle"><span class="toggle-slider"></span></label>
+      </section>
+
+      <section class="setting-group" id="overlay-color-section">
+        <label class="setting-label">Overlay Color</label>
+        <div class="color-picker" id="overlay-color-picker">
+          <button class="color-swatch active" data-color="#FFFF00" title="Yellow" style="background:#FFFF00"></button>
+          <button class="color-swatch" data-color="#90CAF9" title="Blue" style="background:#90CAF9"></button>
+          <button class="color-swatch" data-color="#F48FB1" title="Pink" style="background:#F48FB1"></button>
+          <button class="color-swatch" data-color="#A5D6A7" title="Green" style="background:#A5D6A7"></button>
+          <button class="color-swatch" data-color="#FFCC80" title="Peach" style="background:#FFCC80"></button>
+        </div>
+      </section>
+
+      <hr class="setting-divider">
+
+      <section class="setting-group">
+        <label for="font-select" class="setting-label">Font</label>
+        <select id="font-select" class="setting-control">
+          <option value="default">System Default</option>
+          <option value="OpenDyslexic">OpenDyslexic</option>
+          <option value="Atkinson Hyperlegible">Atkinson Hyperlegible</option>
+          <option value="Lexend">Lexend</option>
+        </select>
+      </section>
+
+      <section class="setting-group">
+        <label for="line-spacing-select" class="setting-label">Line Spacing</label>
+        <select id="line-spacing-select" class="setting-control">
+          <option value="1.0">1.0x (Tight)</option>
+          <option value="1.5" selected>1.5x (Default)</option>
+          <option value="2.0">2.0x (Wide)</option>
+          <option value="2.5">2.5x (Extra Wide)</option>
+        </select>
+      </section>
+
+      <section class="setting-group">
+        <label for="letter-spacing-select" class="setting-label">Letter Spacing</label>
+        <select id="letter-spacing-select" class="setting-control">
+          <option value="normal" selected>Normal</option>
+          <option value="wide">Wide</option>
+          <option value="extra-wide">Extra Wide</option>
+        </select>
+      </section>
+    </div>
+
+    <!-- ==================== AI TAB ==================== -->
+    <div id="tab-ai" class="tab-panel" role="tabpanel">
+      <section class="setting-group">
+        <label for="ai-tier-select" class="setting-label">AI Mode</label>
+        <select id="ai-tier-select" class="setting-control">
+          <option value="off">Off (Reading only)</option>
+          <option value="local">Local AI (Ollama)</option>
+          <option value="cloud">Cloud AI (Claude)</option>
+        </select>
+      </section>
+
+      <section class="setting-group" id="ollama-section" style="display:none">
+        <label for="ollama-url" class="setting-label">Ollama URL</label>
+        <input type="text" id="ollama-url" class="setting-control" value="http://localhost:11434" placeholder="http://localhost:11434">
+      </section>
+
+      <section class="setting-group" id="claude-section" style="display:none">
+        <label for="claude-key" class="setting-label">Claude API Key</label>
+        <input type="password" id="claude-key" class="setting-control" placeholder="sk-ant-...">
+        <p class="setting-hint">Stored in memory only. Re-enter when Chrome restarts.</p>
+      </section>
+
+      <hr class="setting-divider">
+      <h2 class="section-title">Persona Lenses</h2>
+      <p class="setting-hint" style="margin-bottom:8px">Lenses change how the AI frames its responses.</p>
+
+      <div id="lens-list" class="lens-list"></div>
+
+      <button id="btn-add-lens" class="btn-secondary">+ Create Custom Lens</button>
+
+      <!-- Create Lens Form (hidden by default) -->
+      <div id="lens-form" class="lens-form hidden">
+        <input type="text" id="lens-name-input" class="setting-control" placeholder="Lens name" maxlength="40">
+        <textarea id="lens-prompt-input" class="setting-control lens-textarea" placeholder="Prompt template (e.g., 'Respond as a patient tutor...')" maxlength="500"></textarea>
+        <div class="lens-form-actions">
+          <button id="btn-save-lens" class="btn-primary">Save</button>
+          <button id="btn-cancel-lens" class="btn-secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== ABOUT TAB ==================== -->
+    <div id="tab-about" class="tab-panel" role="tabpanel">
+      <div class="about-info">
+        <p><strong>PageSpeak</strong> v1.0.0</p>
+        <p class="setting-hint">Dyslexia-first TTS reader with AI comprehension.</p>
+      </div>
+
+      <hr class="setting-divider">
+      <h2 class="section-title">Reading Stats</h2>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <span class="stat-value" id="stat-words">0</span>
+          <span class="stat-label">Words Read</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value" id="stat-time">0m</span>
+          <span class="stat-label">Time Spent</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value" id="stat-sessions">0</span>
+          <span class="stat-label">Sessions</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value" id="stat-speed">--</span>
+          <span class="stat-label">Avg WPM</span>
+        </div>
+      </div>
+      <button id="btn-reset-stats" class="btn-link">Reset Stats</button>
+
+      <hr class="setting-divider">
+      <h2 class="section-title">Privacy</h2>
+      <p class="setting-hint">
+        Tier 1 (Off): Zero data leaves your machine.<br>
+        Tier 2 (Local AI): Text sent to localhost only.<br>
+        Tier 3 (Cloud AI): Text sent to Anthropic (encrypted).
+      </p>
+
+      <hr class="setting-divider">
+      <h2 class="section-title">Data</h2>
+      <div class="btn-row">
+        <button id="btn-export" class="btn-secondary">Export Settings</button>
+        <button id="btn-import" class="btn-secondary">Import Settings</button>
+      </div>
+      <input type="file" id="import-file" accept=".json" class="hidden">
+
+      <hr class="setting-divider">
+      <button id="btn-reset-defaults" class="btn-danger">Reset to Defaults</button>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

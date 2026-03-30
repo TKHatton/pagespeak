@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to PageSpeak</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #1a1a1a; background: #fafafa; line-height: 1.6;
+    }
+    .container { max-width: 720px; margin: 0 auto; padding: 40px 24px 60px; }
+    .hero { text-align: center; margin-bottom: 40px; }
+    .hero h1 { font-size: 32px; color: #00897b; margin-bottom: 8px; }
+    .hero p { font-size: 16px; color: #666; max-width: 500px; margin: 0 auto; }
+
+    .steps { display: flex; flex-direction: column; gap: 20px; margin-bottom: 40px; }
+    .step {
+      display: flex; gap: 16px; align-items: flex-start;
+      padding: 20px; background: #fff; border-radius: 12px;
+      border: 1px solid #e0e0e0; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .step-num {
+      width: 36px; height: 36px; border-radius: 50%; background: #00897b;
+      color: #fff; display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 16px; flex-shrink: 0;
+    }
+    .step-content h2 { font-size: 16px; color: #333; margin-bottom: 4px; }
+    .step-content p { font-size: 14px; color: #666; }
+    kbd {
+      display: inline-block; padding: 2px 6px; background: #f0f0f0;
+      border: 1px solid #ccc; border-radius: 3px; font-family: monospace;
+      font-size: 12px; color: #333;
+    }
+
+    .section-title { font-size: 20px; color: #00897b; margin-bottom: 16px; text-align: center; }
+
+    /* Features grid */
+    .features { margin-bottom: 40px; }
+    .feature-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .feature-card {
+      padding: 16px; background: #fff; border-radius: 10px;
+      border: 1px solid #e0e0e0;
+    }
+    .feature-card h3 { font-size: 13px; color: #00897b; margin-bottom: 4px; }
+    .feature-card p { font-size: 12px; color: #666; line-height: 1.5; }
+
+    /* Tiers */
+    .tiers { margin-bottom: 40px; }
+    .tier-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .tier-card {
+      padding: 16px; background: #fff; border-radius: 10px; text-align: center;
+      border: 1px solid #e0e0e0;
+    }
+    .tier-card h3 { font-size: 14px; color: #00897b; margin-bottom: 4px; }
+    .tier-card p { font-size: 12px; color: #666; }
+    .tier-badge {
+      display: inline-block; padding: 2px 8px; border-radius: 10px;
+      font-size: 10px; font-weight: 700; text-transform: uppercase; margin-top: 8px;
+    }
+    .tier-free { background: #e8f5e9; color: #2e7d32; }
+    .tier-local { background: #e3f2fd; color: #1565c0; }
+    .tier-cloud { background: #fce4ec; color: #c62828; }
+
+    /* Limitations / Coming Soon */
+    .limitations-box {
+      padding: 20px; background: #fff8e1; border-radius: 10px;
+      border: 1px solid #ffe082; margin-bottom: 16px;
+    }
+    .limitations-box h2 { font-size: 16px; color: #f57f17; margin-bottom: 8px; }
+    .limitations-box p { font-size: 13px; color: #666; margin-bottom: 10px; }
+    .limitations-box ul { list-style: none; padding: 0; }
+    .limitations-box li { font-size: 13px; color: #555; padding: 4px 0; padding-left: 20px; position: relative; }
+    .limitations-box li::before { content: '\2022'; position: absolute; left: 4px; color: #f57f17; font-weight: 700; }
+    .limitations-box strong { color: #333; }
+
+    /* Security callout */
+    .security-box {
+      padding: 20px; background: #e0f2f1; border-radius: 10px;
+      border: 1px solid #b2dfdb; margin-bottom: 40px;
+    }
+    .security-box h2 { font-size: 16px; color: #00695c; margin-bottom: 8px; }
+    .security-box ul { list-style: none; padding: 0; }
+    .security-box li { font-size: 13px; color: #555; padding: 3px 0; padding-left: 20px; position: relative; }
+    .security-box li::before { content: '\2713'; position: absolute; left: 0; color: #00897b; font-weight: 700; }
+
+    .cta { text-align: center; }
+    .cta p { font-size: 14px; color: #666; margin-bottom: 16px; }
+    .cta-btn {
+      display: inline-block; padding: 12px 32px; background: #00897b;
+      color: #fff; border: none; border-radius: 8px; font-size: 15px;
+      font-weight: 600; cursor: pointer; text-decoration: none;
+      transition: background 0.15s;
+    }
+    .cta-btn:hover { background: #00695c; }
+
+    @media (max-width: 600px) {
+      .feature-grid, .tier-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="hero">
+      <h1>Welcome to PageSpeak</h1>
+      <p>Your dyslexia-first reading companion. Read any webpage or PDF aloud with word tracking, focus tools, and an AI sidekick.</p>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h2>Highlight and Read</h2>
+          <p>Select any text on a webpage. A speaker button will appear. Click it to hear the text read aloud. Or press <kbd>Alt+S</kbd>. No selection? It reads the whole page.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h2>Read PDFs Too</h2>
+          <p>Right-click any PDF link and choose "Open PDF in PageSpeak Reader." PageSpeak extracts the text and lets you read it aloud with all the same tools.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h2>Customize Your Experience</h2>
+          <p>Click the PageSpeak icon to open settings. Choose your voice, adjust speed, enable word tracking, switch to a dyslexia-friendly font (OpenDyslexic, Atkinson Hyperlegible, or Lexend), adjust letter spacing, and more.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h2>Ask the AI Sidekick</h2>
+          <p>Open the side panel to summarize, simplify, or ask questions about what you just read. Choose a persona lens to change how the AI responds. Works with local AI (Ollama) or cloud AI (Claude).</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="features">
+      <h2 class="section-title">What You Can Do</h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h3>Word-by-Word Tracking</h3>
+          <p>Each word highlights as the voice reads it. Choose your highlight color from 6 presets.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Focus Lens</h3>
+          <p>A bar at the top of the screen shows the current sentence in large, clear text.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Reading Ruler</h3>
+          <p>A line guide follows your cursor to help you track which line you're reading.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Distraction Dimming</h3>
+          <p>Dims everything except what's being read so you can focus.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Dyslexia-Friendly Fonts</h3>
+          <p>Switch any webpage to OpenDyslexic, Atkinson Hyperlegible, or Lexend with one click.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Letter &amp; Line Spacing</h3>
+          <p>Widen letter and line spacing — the most research-backed reading aid for dyslexia.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Color Overlay</h3>
+          <p>Apply a tinted overlay to reduce visual stress. Choose from 5 colors.</p>
+        </div>
+        <div class="feature-card">
+          <h3>PDF Reader</h3>
+          <p>Open any PDF in PageSpeak's reader. Extracts text and enables all reading tools.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="tiers">
+      <h2 class="section-title">Choose Your Privacy Level</h2>
+      <div class="tier-grid">
+        <div class="tier-card">
+          <h3>Offline</h3>
+          <p>TTS, word tracking, focus lens, fonts, PDF reader. Zero data leaves your machine.</p>
+          <span class="tier-badge tier-free">Free Forever</span>
+        </div>
+        <div class="tier-card">
+          <h3>Local AI</h3>
+          <p>AI comprehension via Ollama running on your computer. Nothing goes to the internet.</p>
+          <span class="tier-badge tier-local">Free + Ollama</span>
+        </div>
+        <div class="tier-card">
+          <h3>Cloud AI</h3>
+          <p>AI comprehension via Claude API. Encrypted, high-quality responses.</p>
+          <span class="tier-badge tier-cloud">API Key Required</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="limitations-box">
+      <h2>What Doesn't Work Yet</h2>
+      <p>PageSpeak works on most websites and PDFs. These platforms use custom rendering that we're actively working on:</p>
+      <ul>
+        <li><strong>Google Docs</strong> — uses a custom canvas renderer instead of standard text. Partial support only. Full support is a top priority for the next update.</li>
+        <li><strong>Microsoft Word Online / Office 365</strong> — similar custom rendering. Full support planned for the next update.</li>
+        <li><strong>Kindle Cloud Reader</strong> — uses obfuscated font rendering that no TTS extension can currently read.</li>
+        <li><strong>Scanned PDFs</strong> — PDFs that are images (no text layer) require OCR, which is planned for a future version.</li>
+        <li><strong>Claude Desktop / Electron apps</strong> — Chrome extensions cannot run in desktop apps. PageSpeak works on claude.ai in the browser.</li>
+      </ul>
+      <h2 style="margin-top: 16px;">Coming Soon</h2>
+      <ul>
+        <li><strong>Premium natural voices</strong> — high-quality AI voices that sound human, replacing the built-in system voices. Multiple voice services planned.</li>
+        <li><strong>Google Docs + Word Online support</strong> — dedicated text extraction for these platforms.</li>
+        <li><strong>Auth0 secure key storage</strong> — encrypted server-side storage for your API key so you don't have to re-enter it each session.</li>
+        <li><strong>OCR for scanned PDFs</strong> — read PDFs that are images, not text.</li>
+      </ul>
+    </div>
+
+    <div class="security-box">
+      <h2>Built With Security First</h2>
+      <ul>
+        <li>All code bundled locally. No remote scripts, no CDNs.</li>
+        <li>Strict Content Security Policy. No eval, no inline scripts.</li>
+        <li>8 security layers protecting against XSS, prompt injection, and data leaks.</li>
+        <li>API keys stored in memory only — never saved to disk.</li>
+        <li>AI text input sanitized and capped at 10,000 characters.</li>
+        <li>AI responses filtered through an allowlist-only HTML sanitizer.</li>
+        <li>Shadow DOM isolation on all injected UI.</li>
+        <li>Open source. Read every line.</li>
+      </ul>
+    </div>
+
+    <div class="cta">
+      <p>You're all set. Try selecting text on any webpage and pressing <kbd>Alt+S</kbd>.</p>
+      <button class="cta-btn" id="btn-close">Start Reading</button>
+    </div>
+  </div>
+
+  <script src="welcome.js"></script>
+</body>
+</html>
