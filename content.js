@@ -29,7 +29,14 @@ function isExtensionContextValid() {
 function safeSendMessage(message, callback) {
   if (!isExtensionContextValid()) return;
   try {
-    chrome.runtime.sendMessage(message, callback);
+    chrome.runtime.sendMessage(message, (response) => {
+      // Check for extension context errors before invoking callback
+      if (chrome.runtime.lastError) {
+        // Service worker may be restarting — ignore gracefully
+        return;
+      }
+      if (callback) callback(response);
+    });
   } catch (e) {
     // Extension context invalidated — page needs a refresh
   }
@@ -570,7 +577,9 @@ function highlightChunkFallback(chunkIndex) {
 function onFloatingBtnClick() {
   const selection = window.getSelection();
   const rawText = selection ? selection.toString().trim() : '';
-  const text = sanitizeText(rawText);
+  // Fall back to the last captured selection — clicking the button
+  // often clears the selection on SPAs before we can read it.
+  const text = sanitizeText(rawText || lastSelectionText);
 
   if (!text) return;
 
@@ -1054,9 +1063,11 @@ function removeColorOverlay() {
 // Load & Sync All Settings
 // ============================================================
 
-safeSendMessage({ type: 'GET_SETTINGS' }, (response) => {
-  if (!response || !response.settings) return;
-  const s = response.settings;
+/**
+ * Apply loaded settings to the content script UI.
+ */
+function applySettings(s) {
+  if (!s) return;
   if (s.speed) currentSpeed = s.speed;
   if (s.highlightEnabled !== undefined) highlightEnabled = s.highlightEnabled;
   if (s.highlightColor) highlightColor = s.highlightColor;
@@ -1073,7 +1084,22 @@ safeSendMessage({ type: 'GET_SETTINGS' }, (response) => {
   if (s.lineSpacing && s.lineSpacing !== 1.5) applyLineSpacing(s.lineSpacing);
   if (s.letterSpacing && s.letterSpacing !== 'normal') applyLetterSpacing(s.letterSpacing);
   if (s.colorOverlayEnabled) applyColorOverlay(true, s.colorOverlayColor, s.colorOverlayOpacity);
+}
+
+// Primary: ask service worker for settings (includes defaults)
+safeSendMessage({ type: 'GET_SETTINGS' }, (response) => {
+  if (response && response.settings) applySettings(response.settings);
 });
+
+// Fallback: load directly from chrome.storage.sync in case the service
+// worker message fails (e.g., service worker is still waking up).
+// This ensures overlay and fonts appear even if the service worker is slow.
+try {
+  chrome.storage.sync.get(null, (settings) => {
+    if (chrome.runtime.lastError) return;
+    if (settings) applySettings(settings);
+  });
+} catch (e) { /* extension context invalid */ }
 
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== 'sync') return;
