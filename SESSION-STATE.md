@@ -218,8 +218,8 @@ A comprehensive 30-point audit was performed after all sessions were complete. H
 - [x] TTS reads selected text
 - [x] TTS reads entire page (no selection)
 - [x] PDF reading via PageSpeak Reader (pdf.js)
-- [x] Keyboard shortcut Ctrl+Shift+S (read)
-- [x] Keyboard shortcut Ctrl+Shift+X (pause/resume)
+- [x] Keyboard shortcut Alt+S (read)
+- [x] Keyboard shortcut Alt+P (pause/resume)
 - [x] Context menu "Read Aloud with PageSpeak"
 - [x] Context menu "Open PDF in PageSpeak Reader"
 - [x] Voice selection + persistence

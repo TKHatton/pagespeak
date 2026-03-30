@@ -583,8 +583,8 @@ function onSpeedClick() {
 // Debounce timer to avoid rapid show/hide flickering
 let selectionTimer = null;
 
-document.addEventListener('mouseup', (e) => {
-  if (e.target === shadowHost) return;
+document.addEventListener('mouseup', (evt) => {
+  if (evt.target === shadowHost) return;
 
   clearTimeout(selectionTimer);
   selectionTimer = setTimeout(() => {
@@ -592,38 +592,48 @@ document.addEventListener('mouseup', (e) => {
       const selection = window.getSelection();
       const text = selection ? selection.toString().trim() : '';
 
-      if (text && text !== lastSelectionText && !isReading) {
+      if (text && !isReading) {
         lastSelectionText = text;
         createShadowUI();
-        const range = selection.getRangeAt(0);
-        const rect = range.getBoundingClientRect();
-        showFloatingButton(rect.right, rect.bottom);
+        if (selection.rangeCount > 0) {
+          const range = selection.getRangeAt(0);
+          const rect = range.getBoundingClientRect();
+          showFloatingButton(rect.right, rect.bottom);
+        }
       } else if (!text) {
         lastSelectionText = '';
         if (!isReading) hideFloatingButton();
       }
-    } catch (e) { /* selection detection failure is non-critical */ }
-  }, 100);
+    } catch (err) {
+      console.error('PageSpeak selection error:', err);
+    }
+  }, 150);
 });
 
 document.addEventListener('selectionchange', () => {
-  const selection = window.getSelection();
-  const text = selection ? selection.toString().trim() : '';
+  try {
+    const selection = window.getSelection();
+    const text = selection ? selection.toString().trim() : '';
 
-  if (!text && lastSelectionText) {
-    lastSelectionText = '';
-    if (!isReading) {
-      hideFloatingButton();
+    if (!text && lastSelectionText) {
+      lastSelectionText = '';
+      if (!isReading) {
+        hideFloatingButton();
+      }
     }
-  }
+  } catch (err) { /* non-critical */ }
 });
 
 // Hide floating UI when clicking elsewhere (not on our UI)
-document.addEventListener('mousedown', (e) => {
-  if (e.target === shadowHost) return;
-  if (!isReading) {
-    hideFloatingButton();
-  }
+document.addEventListener('mousedown', (evt) => {
+  // Don't hide if clicking on our own Shadow DOM host
+  if (evt.target === shadowHost) return;
+  // Don't hide while reading (control bar should stay)
+  if (isReading) return;
+  // Small delay to let the floating button click handler fire first
+  setTimeout(() => {
+    if (!isReading) hideFloatingButton();
+  }, 50);
 });
 
 // Hide on scroll if not reading

@@ -47,15 +47,15 @@
   "commands": {
     "read-selection": {
       "suggested_key": {
-        "default": "Ctrl+Shift+S",
-        "mac": "Command+Shift+S"
+        "default": "Alt+S",
+        "mac": "Alt+S"
       },
       "description": "Read selected text aloud"
     },
     "toggle-reading": {
       "suggested_key": {
-        "default": "Ctrl+Shift+X",
-        "mac": "Command+Shift+X"
+        "default": "Alt+P",
+        "mac": "Alt+P"
       },
       "description": "Pause or resume reading"
     }

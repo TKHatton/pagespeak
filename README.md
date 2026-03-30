@@ -14,7 +14,7 @@ Built for people with dyslexia. Useful for everyone.
 - **Highlight and read** — Select any text, click the floating speaker button, and listen
 - **Read entire page** — One click reads the main content of any webpage
 - **Read PDFs** — Open any PDF in PageSpeak's built-in reader with full TTS support
-- **Keyboard shortcuts** — `Ctrl+Shift+S` to read, `Ctrl+Shift+X` to pause/resume
+- **Keyboard shortcuts** — `Alt+S` to read, `Alt+P` to pause/resume
 - **Voice selection** — Choose from all voices installed on your system
 - **Speed, pitch, and volume controls** — Fine-tune your listening experience
 - **Smart sentence chunking** — Long text never freezes or cuts off
