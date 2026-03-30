@@ -4,6 +4,18 @@
 
 ---
 
+## BEFORE YOU START — READ THESE FILES FIRST
+
+Before writing any code or making any changes, read these files in full to understand the current state of the project:
+
+1. **`SESSION-STATE.md`** — Complete build log across all sessions. Includes every decision, security rationale, and what was built. Session 8 covers the latest Auth0 + landing page work.
+2. **`NEXT-SESSION-PROMPT.md`** — This file. Priorities, architecture, and what's done vs. not done.
+3. **Memory files** at `C:\Users\ltken\.claude\projects\C--Users-ltken-OneDrive-Documents-GitHub-pagespeak\memory\` — Project overview, user profile, and preferences.
+
+Do not skip this step. Understanding the full context prevents duplicate work, conflicting security decisions, and architectural drift.
+
+---
+
 ## CONTEXT: What PageSpeak Is
 
 PageSpeak is a dyslexia-first text-to-speech Chrome extension I built. It's live on my machine and working. The full source code is at:
