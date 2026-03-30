@@ -201,13 +201,21 @@
     </div>
 
     <div class="limitations-box">
-      <h2>Coming Soon</h2>
-      <p>PageSpeak works on most websites and PDFs. These platforms use custom rendering that we're working on supporting:</p>
+      <h2>What Doesn't Work Yet</h2>
+      <p>PageSpeak works on most websites and PDFs. These platforms use custom rendering that we're actively working on:</p>
       <ul>
-        <li><strong>Google Docs</strong> — uses a custom canvas renderer. Partial support only. We're building a dedicated extractor.</li>
-        <li><strong>Microsoft Word Online</strong> — similar custom rendering. Full support planned for a future update.</li>
+        <li><strong>Google Docs</strong> — uses a custom canvas renderer instead of standard text. Partial support only. Full support is a top priority for the next update.</li>
+        <li><strong>Microsoft Word Online / Office 365</strong> — similar custom rendering. Full support planned for the next update.</li>
         <li><strong>Kindle Cloud Reader</strong> — uses obfuscated font rendering that no TTS extension can currently read.</li>
         <li><strong>Scanned PDFs</strong> — PDFs that are images (no text layer) require OCR, which is planned for a future version.</li>
+        <li><strong>Claude Desktop / Electron apps</strong> — Chrome extensions cannot run in desktop apps. PageSpeak works on claude.ai in the browser.</li>
+      </ul>
+      <h2 style="margin-top: 16px;">Coming Soon</h2>
+      <ul>
+        <li><strong>Premium natural voices</strong> — high-quality AI voices that sound human, replacing the built-in system voices. Multiple voice services planned.</li>
+        <li><strong>Google Docs + Word Online support</strong> — dedicated text extraction for these platforms.</li>
+        <li><strong>Auth0 secure key storage</strong> — encrypted server-side storage for your API key so you don't have to re-enter it each session.</li>
+        <li><strong>OCR for scanned PDFs</strong> — read PDFs that are images, not text.</li>
       </ul>
     </div>
 

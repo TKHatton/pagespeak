@@ -305,17 +305,113 @@ README.md                  — Project documentation
 
 ---
 
-## Known Issues (v1.0.0)
+## Post-Build Fix: SPA Selection Detection (claude.ai, ChatGPT)
 
-- Placeholder icons need replacing with designed assets
-- Scanned PDFs without text layers are not supported (would need OCR)
-- Google Docs uses custom canvas rendering — partial support only
-- Kindle Cloud Reader is not supported (obfuscated font rendering)
+**Problem discovered:** The floating speaker button did not appear when selecting text on claude.ai or ChatGPT. The extension loaded correctly (content script injected, shadow host created), but the button never showed.
 
-## Deferred to v1.1
+**Root cause:** React-based SPAs (claude.ai, ChatGPT, and similar) call `event.stopPropagation()` on their `mouseup` event handlers. PageSpeak's `document.addEventListener('mouseup', ...)` was using the default **bubbling phase**, so the event was killed by the SPA before it ever reached our listener.
 
-- Auth0 Token Vault for secure API key storage
-- declarativeNetRequest rules for network-level lockdown
-- Canary detection for prompt injection monitoring
-- Content script `chrome.storage` access restriction
-- Google Docs text extraction (experimental)
+**Fix applied:**
+1. **`selectionchange` is now the PRIMARY trigger** — this event fires directly on `document` and **cannot be blocked** by `stopPropagation()`. It fires whenever any text selection changes on the page, regardless of what the page's JavaScript does. This is the correct approach for maximum compatibility.
+2. **`mouseup` now uses `{ capture: true }`** — the capture phase fires top-down (document first), so our handler runs **before** any SPA handler can block it. This serves as a faster backup trigger on simpler pages.
+3. **`mousedown` also uses `{ capture: true }`** — ensures consistent behavior for hiding the button when starting a new selection.
+
+**Why this matters:** Without this fix, PageSpeak would not work on the most popular AI chat interfaces (claude.ai, ChatGPT, Gemini), which are precisely the kinds of text-heavy pages where users with dyslexia need reading support the most.
+
+**Testing verified on:**
+- claude.ai — floating button now appears on selecting Claude's responses ✓
+- ChatGPT — content script loads and shadow host present ✓
+- Wikibooks, Wikipedia — continues to work ✓
+- Regular webpages — no regression ✓
+
+---
+
+## Known Limitations (v1.0.0)
+
+### Does NOT work on:
+- **Microsoft Word Online / Office 365** — custom canvas-based renderer, text is not in standard DOM nodes. Selection may partially work but word tracking will not.
+- **Google Docs** — custom canvas rendering with non-standard DOM. Selection behavior is custom. TTS may work via Alt+S on selected text, but word tracking and floating button positioning will be unreliable.
+- **Claude Desktop app** — Electron app, not a browser. Chrome extensions cannot run in Electron apps. Would require a completely separate system-level tool.
+- **Kindle Cloud Reader** — Amazon uses custom font subsets where characters in DOM don't map to displayed letters. Results in garbled TTS output. All tested TTS extensions fail here.
+- **Scanned PDFs without text layers** — would need OCR (optical character recognition). The PDF reader only extracts existing text layers.
+
+### Works but with limitations:
+- **Some voices sound robotic** — the extension uses system-installed voices via `chrome.tts`. Quality depends entirely on what voices the user has installed. Windows default SAPI voices are particularly poor quality. macOS Siri voices are better. High-quality cloud voices (like ElevenLabs, Play.ht) would require API integration.
+
+---
+
+## Decisions Made and Why
+
+### Architecture decisions:
+1. **Vanilla JS, no frameworks** — zero supply chain risk, no build step, maximum transparency for security audit. Every line of code is readable.
+2. **Shadow DOM closed mode** — CSS/layout isolation from host pages. NOT treated as a security boundary (known bypasses exist), but prevents visual conflicts.
+3. **Service worker as message broker** — content script and side panel cannot communicate directly. All messages route through the service worker for validation.
+4. **Memory-only API key storage** — `chrome.storage.local` is plaintext. Storing the Claude API key only in service worker memory means it's cleared on browser restart. Less convenient but much safer.
+
+### Feature decisions:
+1. **3 fonts instead of 1** — different fonts work for different dyslexic readers. Research is mixed on any single font. Offering choice respects individual differences.
+2. **Letter spacing added** — stronger research evidence than any font change. Trivial to implement (one CSS property), huge impact.
+3. **Reading ruler added** — proven to improve reading speed in multiple studies. Simple cursor-following overlay.
+4. **"Simplify This" AI action** — builds on existing AI infrastructure with zero additional complexity. High value for reading comprehension.
+5. **selectionchange as primary trigger** — ensures compatibility with ALL websites including SPAs. More robust than mouseup which can be blocked.
+
+### Security decisions:
+1. **8 defense layers** — defense in depth. Any single layer can fail and the others still protect the user.
+2. **Prompt delimiters** — prevents prompt injection from malicious page content. The AI is explicitly told to never follow instructions inside the delimited text.
+3. **Rate limiter** — prevents accidental API bill spikes (10 requests/minute).
+4. **Ollama restricted to localhost** — prevents data exfiltration through manipulated Ollama URL settings.
+5. **Output sanitizer with safe fallback** — if the sanitizer itself fails, content renders as safe `textContent`. Defense in depth.
+
+---
+
+## Next Steps (v1.1 Priorities)
+
+### HIGH PRIORITY — Core functionality gaps:
+
+1. **High-quality TTS voices** — current system voices are not good enough to sell. Options:
+   - Integrate with ElevenLabs API (high quality, $5/mo+)
+   - Integrate with Play.ht API (natural voices, pay-per-use)
+   - Integrate with Google Cloud TTS (good quality, pay-per-use)
+   - Integrate with Azure Cognitive Services TTS (neural voices)
+   - Must add as Tier 4 or replace Tier 3 voice component
+   - User should be able to preview voices before committing
+   - Privacy disclosure needed for any cloud voice service
+
+2. **Microsoft Word Online / Google Docs support** — these are essential for students and professionals with dyslexia. Options:
+   - **Word Online:** Explore accessibility API access, or use clipboard-based extraction
+   - **Google Docs:** Explore their accessibility tree, or build a "copy → paste → read" workflow
+   - Both may require additional permissions
+   - May need to detect these apps and offer an alternative reading flow
+
+3. **Auth0 Token Vault** — secure server-side storage for Claude API keys. Currently keys are memory-only (cleared on restart). Auth0 PKCE flow + Token Vault would let users authenticate once and have their key stored encrypted server-side.
+
+### MEDIUM PRIORITY — Polish and monetization:
+
+4. **Professional icons** — replace placeholder icons with designed assets (16, 48, 128px + toolbar icon)
+5. **Chrome Web Store submission** — listing description, screenshots, promotional images
+6. **Monetization setup** — ExtensionPay or Stripe for Tier 3 + Personas subscription ($4.99/mo or $39/yr)
+7. **declarativeNetRequest rules** — network-level lockdown restricting outbound connections to only allowed domains
+8. **Canary detection** — embed invisible markers in AI prompts to detect prompt injection attempts
+
+### LOWER PRIORITY — Nice to have:
+
+9. **OCR for scanned PDFs** — Tesseract.js integration for PDFs without text layers
+10. **Kindle support** — likely impossible without Amazon cooperation
+11. **Usage analytics dashboard** — words read over time, voice preferences, most-used features
+12. **Multi-language TTS** — automatic language detection for multilingual pages
+13. **Collaborative reading lists** — save articles to read later with settings presets
+
+---
+
+## Settings Schema Version: 1
+
+## Security checks passed: Yes (30-point audit + SPA fix)
+
+## Notes for next context window:
+- The SPA selection fix (selectionchange + capture phase) was applied after the initial 7-session build
+- Voices are functional but low quality — user wants cloud voice integration for v1.1
+- Google Docs and Word Online support are the user's top priorities for v1.1
+- Auth0 integration was researched but deferred — PKCE flow architecture is documented in the Amended Plan
+- The user is security-focused and wants "protections on top of protections"
+- All code is vanilla JS with no dependencies except pdf.js (BSD license)
+- Total bundle: 2.1MB, well under 10MB Chrome Web Store limit

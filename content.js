@@ -583,12 +583,20 @@ function onSpeedClick() {
 // Selection Detection
 // ============================================================
 
-// Debounce timer to avoid rapid show/hide flickering
+// ============================================================
+// Selection Detection
+// Uses selectionchange as PRIMARY trigger (works on all sites
+// including SPAs like claude.ai, ChatGPT that stopPropagation
+// on mouseup). mouseup with capture:true is a BACKUP trigger.
+// ============================================================
+
 let selectionTimer = null;
 
-document.addEventListener('mouseup', (evt) => {
-  if (evt.target === shadowHost) return;
-
+/**
+ * Core selection handler — called from both selectionchange and mouseup.
+ * Shows floating button when text is selected, hides when cleared.
+ */
+function handleSelectionChange() {
   clearTimeout(selectionTimer);
   selectionTimer = setTimeout(() => {
     try {
@@ -601,7 +609,10 @@ document.addEventListener('mouseup', (evt) => {
         if (selection.rangeCount > 0) {
           const range = selection.getRangeAt(0);
           const rect = range.getBoundingClientRect();
-          showFloatingButton(rect.right, rect.bottom);
+          // Only show if we have a valid position (rect can be 0,0 in edge cases)
+          if (rect.width > 0 || rect.height > 0) {
+            showFloatingButton(rect.right, rect.bottom);
+          }
         }
       } else if (!text) {
         lastSelectionText = '';
@@ -610,22 +621,19 @@ document.addEventListener('mouseup', (evt) => {
     } catch (err) {
       console.error('PageSpeak selection error:', err);
     }
-  }, 150);
-});
+  }, 200);
+}
 
-document.addEventListener('selectionchange', () => {
-  try {
-    const selection = window.getSelection();
-    const text = selection ? selection.toString().trim() : '';
+// PRIMARY: selectionchange fires on document regardless of stopPropagation.
+// This is what makes PageSpeak work on claude.ai, ChatGPT, and other SPAs.
+document.addEventListener('selectionchange', handleSelectionChange);
 
-    if (!text && lastSelectionText) {
-      lastSelectionText = '';
-      if (!isReading) {
-        hideFloatingButton();
-      }
-    }
-  } catch (err) { /* non-critical */ }
-});
+// BACKUP: mouseup in capture phase (fires before SPA handlers can block it).
+// Provides faster response on simple pages where selectionchange may be delayed.
+document.addEventListener('mouseup', (evt) => {
+  if (evt.target === shadowHost) return;
+  handleSelectionChange();
+}, true); // capture: true — fires before any SPA stopPropagation
 
 // Hide floating UI when clicking elsewhere (not on our UI)
 document.addEventListener('mousedown', (evt) => {
@@ -636,8 +644,8 @@ document.addEventListener('mousedown', (evt) => {
   // Small delay to let the floating button click handler fire first
   setTimeout(() => {
     if (!isReading) hideFloatingButton();
-  }, 50);
-});
+  }, 100);
+}, true); // capture phase for SPA compatibility
 
 // Hide on scroll if not reading
 let scrollTimer = null;
