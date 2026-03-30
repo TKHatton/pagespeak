@@ -163,6 +163,31 @@
 
     <!-- ==================== AI TAB ==================== -->
     <div id="tab-ai" class="tab-panel" role="tabpanel">
+
+      <!-- Account Section (logged out) -->
+      <div id="auth-logged-out" class="auth-section">
+        <p class="auth-tagline">Sign in to unlock premium features</p>
+        <button id="btn-login" class="btn-primary auth-btn">Log In / Sign Up</button>
+        <p class="setting-hint auth-hint">Powered by Auth0 by Okta. Your credentials are never stored in the extension.</p>
+      </div>
+
+      <!-- Account Section (logged in) -->
+      <div id="auth-logged-in" class="auth-section hidden">
+        <div class="auth-profile">
+          <div class="auth-avatar" id="auth-avatar"></div>
+          <div class="auth-info">
+            <span class="auth-name" id="auth-name"></span>
+            <span class="auth-email" id="auth-email"></span>
+          </div>
+        </div>
+        <div class="auth-status">
+          <span class="sub-badge sub-trial" id="sub-badge">7-Day Trial</span>
+        </div>
+        <button id="btn-logout" class="btn-link auth-logout-btn">Log Out</button>
+      </div>
+
+      <hr class="setting-divider">
+
       <section class="setting-group">
         <label for="ai-tier-select" class="setting-label">AI Mode</label>
         <select id="ai-tier-select" class="setting-control">

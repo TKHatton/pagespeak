@@ -45,6 +45,16 @@ const lensPromptInput = document.getElementById('lens-prompt-input');
 const btnSaveLens = document.getElementById('btn-save-lens');
 const btnCancelLens = document.getElementById('btn-cancel-lens');
 
+// --- Account / Auth ---
+const authLoggedOut = document.getElementById('auth-logged-out');
+const authLoggedIn = document.getElementById('auth-logged-in');
+const authAvatar = document.getElementById('auth-avatar');
+const authName = document.getElementById('auth-name');
+const authEmail = document.getElementById('auth-email');
+const subBadge = document.getElementById('sub-badge');
+const btnLogin = document.getElementById('btn-login');
+const btnLogout = document.getElementById('btn-logout');
+
 // --- About Tab ---
 const btnExport = document.getElementById('btn-export');
 const btnImport = document.getElementById('btn-import');
@@ -94,6 +104,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadStats();
   await updateReadingStatus();
   attachListeners();
+  loadAuthState();
 });
 
 // ============================================================
@@ -441,3 +452,74 @@ function updateAITierUI(tier) {
   ollamaSection.style.display = tier === 'local' ? 'block' : 'none';
   claudeSection.style.display = tier === 'cloud' ? 'block' : 'none';
 }
+
+// ============================================================
+// Auth0 Authentication
+// ============================================================
+
+function loadAuthState() {
+  chrome.runtime.sendMessage({ type: 'AUTH_GET_STATE' }, (response) => {
+    if (chrome.runtime.lastError || !response) return;
+    updateAuthUI(response);
+  });
+}
+
+function updateAuthUI(state) {
+  if (state.isAuthenticated && state.user) {
+    authLoggedOut.classList.add('hidden');
+    authLoggedIn.classList.remove('hidden');
+
+    authName.textContent = state.user.name || 'User';
+    authEmail.textContent = state.user.email || '';
+
+    // Avatar: use profile picture or first letter fallback
+    if (state.user.picture) {
+      authAvatar.style.backgroundImage = 'url(' + state.user.picture + ')';
+      authAvatar.textContent = '';
+    } else {
+      authAvatar.style.backgroundImage = '';
+      authAvatar.textContent = (state.user.name || 'U')[0].toUpperCase();
+    }
+
+    // Subscription badge (placeholder for Stripe integration)
+    if (state.subscription && state.subscription.status === 'active') {
+      subBadge.textContent = 'Pro';
+      subBadge.className = 'sub-badge sub-active';
+    } else {
+      subBadge.textContent = '7-Day Trial';
+      subBadge.className = 'sub-badge sub-trial';
+    }
+  } else {
+    authLoggedOut.classList.remove('hidden');
+    authLoggedIn.classList.add('hidden');
+  }
+}
+
+// Login button
+btnLogin.addEventListener('click', () => {
+  btnLogin.disabled = true;
+  btnLogin.textContent = 'Opening login...';
+
+  chrome.runtime.sendMessage({ type: 'AUTH_LOGIN' }, (response) => {
+    btnLogin.disabled = false;
+    btnLogin.textContent = 'Log In / Sign Up';
+
+    if (chrome.runtime.lastError) {
+      console.warn('Login error:', chrome.runtime.lastError);
+      return;
+    }
+
+    if (response && response.success) {
+      loadAuthState();
+    } else if (response && response.error) {
+      console.warn('Login failed:', response.error);
+    }
+  });
+});
+
+// Logout button
+btnLogout.addEventListener('click', () => {
+  chrome.runtime.sendMessage({ type: 'AUTH_LOGOUT' }, () => {
+    loadAuthState();
+  });
+});

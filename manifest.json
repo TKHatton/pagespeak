@@ -11,7 +11,8 @@
     "storage",
     "sidePanel",
     "contextMenus",
-    "scripting"
+    "scripting",
+    "identity"
   ],
 
   "optional_host_permissions": [

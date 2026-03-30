@@ -1,9 +1,11 @@
+importScripts('auth-config.js', 'auth.js');
+
 'use strict';
 
 // ============================================================
 // PageSpeak Service Worker
 // TTS engine, message broker, keyboard shortcuts, keep-alive,
-// context menu, onInstalled handler
+// context menu, onInstalled handler, Auth0 authentication
 // ============================================================
 
 // --- Constants ---
@@ -64,6 +66,9 @@ try {
 } catch (e) {
   // chrome.storage.session may not be available in older Chrome versions
 }
+
+// Restore Auth0 session from session storage (silent re-auth)
+restoreSession().catch((e) => console.warn('PageSpeak: auth restore failed', e));
 
 // ============================================================
 // Message origin validation (Security Layer 3)
@@ -251,6 +256,26 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       }).catch(() => {});
       sendResponse({ success: true });
       break;
+
+    // --- Auth0 Authentication ---
+
+    case 'AUTH_LOGIN':
+      login().then(sendResponse).catch((e) => sendResponse({ error: e.message }));
+      return true; // async
+
+    case 'AUTH_LOGOUT':
+      logout().then(sendResponse).catch((e) => sendResponse({ error: e.message }));
+      return true; // async
+
+    case 'AUTH_GET_STATE':
+      sendResponse(getAuthState());
+      break;
+
+    case 'AUTH_REFRESH':
+      getAccessToken()
+        .then((token) => sendResponse({ token }))
+        .catch((e) => sendResponse({ error: e.message }));
+      return true; // async
 
     default:
       sendResponse({ error: 'Unknown message type' });
