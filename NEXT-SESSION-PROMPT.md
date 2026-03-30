@@ -97,6 +97,7 @@ System voices aren't good enough to sell. Research and integrate at least one cl
 - **Play.ht** (natural voices, pay-per-use)
 - **Google Cloud TTS** (reliable, pay-per-use)
 - **Azure Neural Voices** (high quality, pay-per-use)
+- **Live Kit** (Users top pick because it's free)
 
 Requirements:
 - User selects "Premium Voices" as a voice category in settings
@@ -140,6 +141,10 @@ Create promotional content I can use to announce PageSpeak:
   - Open source
   - AI comprehension that actually helps you understand what you read
   - Works on PDFs, SPAs (claude.ai, ChatGPT), and regular websites
+
+  ### Priority 6: Favicon
+  Create a great favicon to represent the brand using the colors and style of the tool. 
+  - add in all the sizes that are needed for that and the .ico as well
 
 ---
 
