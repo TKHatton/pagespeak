@@ -403,15 +403,112 @@ README.md                  — Project documentation
 
 ---
 
+## SESSION 8 — Landing Page + Auth0 Integration (March 30, 2026)
+
+### Goal:
+Create a public landing page, deploy to Netlify, and implement Auth0 authentication in the extension.
+
+### What was built:
+
+**Landing Page (`landing/index.html`)**
+- Professional marketing page for PageSpeak
+- Hero section with CTA buttons
+- Problem statement (1 in 5 people struggle with dyslexia)
+- Research-backed features grid covering all 12 reading tools
+- Pricing section: $8/month with 7-day free trial
+- Privacy tiers comparison section
+- Auth0 security section (enterprise-grade, FERPA/COPPA ready)
+- FAQ section (8 questions)
+- Mobile responsive, WCAG-compliant, no tracking/cookies
+- Deployed to Netlify (live)
+
+**Auth0 PKCE Authentication (new files: `auth-config.js`, `auth.js`)**
+- Full OAuth2 Authorization Code + PKCE flow using `chrome.identity.launchWebAuthFlow()`
+- No external scripts loaded (CSP-safe)
+- PKCE helpers using Web Crypto API (SHA-256 code challenge)
+- Token exchange via POST to Auth0 `/oauth/token`
+- Silent session restore on service worker wake via refresh tokens
+- State parameter for CSRF protection
+- Refresh token rotation support
+
+**Token storage strategy:**
+| Token | Storage | Rationale |
+|-------|---------|-----------|
+| Access token | Service worker memory | Short-lived, lost on SW sleep, restored via refresh |
+| Refresh token | chrome.storage.session | Survives SW restarts, cleared on browser close |
+| ID token | Decoded in memory | Only used to extract user profile at login |
+
+**Manifest changes:**
+- Added `identity` permission for `chrome.identity.launchWebAuthFlow()`
+
+**Service worker changes:**
+- `importScripts('auth-config.js', 'auth.js')` at top
+- `restoreSession()` called on startup for silent re-auth
+- 4 new message types: `AUTH_LOGIN`, `AUTH_LOGOUT`, `AUTH_GET_STATE`, `AUTH_REFRESH`
+
+**Popup UI changes:**
+- Login/account section added inside the AI tab (not a separate tab)
+- Logged-out state: "Log In / Sign Up" button + Auth0 branding
+- Logged-in state: avatar, name, email, subscription badge, logout button
+- Subscription status badge (placeholder: "7-Day Trial")
+
+**Security decisions:**
+- PKCE prevents authorization code interception
+- State parameter prevents CSRF
+- Auth messages go through existing `isValidSender()` check
+- No client secret (SPA PKCE flow — nothing to leak)
+- Redirect URL controlled by Chrome — only this extension can receive callbacks
+- Auth0 config values (domain, clientId) are public — safe to embed
+
+### What's NOT done yet:
+- Auth0 dashboard not configured (user needs to create app, set callback URLs)
+- `auth-config.js` has placeholder values — user must fill in domain + clientId
+- Stripe payments not integrated (Step 2 — next session)
+- No feature gating based on subscription status
+- No Netlify Functions backend for Stripe webhooks
+- Landing page CTA buttons still have `href="#"` — need to connect to actual subscription flow
+
+---
+
+## v1.1 Priorities (UPDATED)
+
+### COMPLETED:
+1. ~~Landing page~~ — DONE, deployed to Netlify
+2. ~~Auth0 integration~~ — DONE, PKCE flow implemented, needs dashboard config
+
+### NEXT UP:
+1. **Auth0 dashboard configuration** — user creates SPA app, sets callback URL, fills in auth-config.js
+2. **Stripe integration** — $8/month subscription, 7-day trial, Netlify Functions backend
+3. **Feature gating** — lock AI features behind subscription after trial
+4. **Connect landing page CTAs** — buttons link to Stripe Checkout
+5. **Premium voice integration** — ElevenLabs, Play.ht, or LiveKit
+6. **Google Docs + Word Online support**
+7. **OCR for scanned PDFs** — Tesseract.js
+
+### LOWER PRIORITY — Nice to have:
+8. **Kindle support** — likely impossible without Amazon cooperation
+9. **Usage analytics dashboard** — words read over time, voice preferences
+10. **Multi-language TTS** — automatic language detection
+11. **Professional icons** — replace placeholders
+12. **Chrome Web Store submission**
+
+---
+
 ## Settings Schema Version: 1
 
-## Security checks passed: Yes (30-point audit + SPA fix)
+## Security checks passed: Yes (30-point audit + SPA fix + Auth0 security review)
 
 ## Notes for next context window:
-- The SPA selection fix (selectionchange + capture phase) was applied after the initial 7-session build
-- Voices are functional but low quality — user wants cloud voice integration for v1.1
-- Google Docs and Word Online support are the user's top priorities for v1.1
-- Auth0 integration was researched but deferred — PKCE flow architecture is documented in the Amended Plan
+- Auth0 is IMPLEMENTED but NOT CONFIGURED — user needs to create Auth0 app, set callback URL, fill in auth-config.js
+- The extension logs `PageSpeak Auth0 redirect URL: https://<ext-id>.chromiumapp.org/` to console on load — user should copy this into Auth0 dashboard
+- Stripe is the NEXT integration — $8/month, 7-day trial, using Netlify Functions as backend
+- The monetization model: Auth0 (auth) + Stripe (payments) + Netlify Functions (webhook receiver + subscription status)
+- Landing page is deployed on Netlify — same repo can host Netlify Functions
+- Login UI is inside the AI tab (not a separate tab) — user's choice
+- Token storage follows existing pattern: sensitive data in memory only, refresh token in chrome.storage.session
+- The user has both Auth0 and Stripe accounts already created
+- Voices are functional but low quality — user wants cloud voice integration
+- Google Docs and Word Online support remain high priority
 - The user is security-focused and wants "protections on top of protections"
 - All code is vanilla JS with no dependencies except pdf.js (BSD license)
-- Total bundle: 2.1MB, well under 10MB Chrome Web Store limit
+- Total bundle: ~2.1MB, well under 10MB Chrome Web Store limit

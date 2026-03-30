@@ -45,15 +45,18 @@ GitHub repo: `https://github.com/TKHatton/pagespeak.git`
 - Total bundle size: 2.1MB
 
 ### Architecture:
-- `manifest.json` — MV3 config, strict CSP (`script-src 'self'; object-src 'none'`), 6 permissions
-- `service-worker.js` — TTS engine, message broker, rate limiter, stats, AI key store (memory-only)
+- `manifest.json` — MV3 config, strict CSP (`script-src 'self'; object-src 'none'`), 7 permissions (includes `identity`)
+- `service-worker.js` — TTS engine, message broker, rate limiter, stats, AI key store (memory-only), Auth0 message handlers
+- `auth-config.js` — Auth0 domain/clientId config (PLACEHOLDER — needs user's values)
+- `auth.js` — Auth0 PKCE login/logout/refresh, token management, session restore
 - `content.js` — floating UI, word tracking, focus lens, ruler, dimming, font/spacing, selection detection
-- `popup.html/js/css` — tabbed settings dashboard
+- `popup.html/js/css` — tabbed settings dashboard with login/account section in AI tab
 - `sidepanel.html/js/css` — AI chat with streaming + persona lenses
 - `pdf-reader.html` — PDF text extraction + reading UI
 - `lib/text-extractor.js` — Readability-style page content extractor
 - `lib/sanitizer.js` — allowlist-only HTML sanitizer for AI responses
 - `lib/pdf.min.js` + `lib/pdf.worker.min.js` — Mozilla pdf.js
+- `landing/index.html` — public marketing page (deployed on Netlify)
 
 ### Key files to read first:
 1. `SESSION-STATE.md` — comprehensive build log with every decision, fix, and rationale
@@ -80,71 +83,51 @@ These are the gaps I need fixed:
 
 ---
 
+## WHAT WAS COMPLETED IN SESSION 8
+
+- **Landing page** — DONE, deployed to Netlify, at `landing/index.html`
+- **Auth0 PKCE authentication** — DONE, `auth.js` + `auth-config.js` created, service worker + popup wired up
+- **Auth0 is NOT YET CONFIGURED** — user needs to:
+  1. Create SPA in Auth0 Dashboard
+  2. Set callback URL to the redirect URL logged in console
+  3. Fill in `auth-config.js` with domain + clientId
+
 ## WHAT I NEED BUILT IN THIS SESSION
 
-### Priority 1: OCR for Scanned PDFs (HIGH)
-I need to read EVERYTHING on screen. Scanned PDFs are common in academic and legal contexts. Integrate Tesseract.js (Apache 2.0 license) into the PDF reader:
-- Detect when a PDF page has no text layer (pdf.js returns empty text)
-- Fall back to OCR via Tesseract.js to extract text from the rendered page image
-- Show user a progress indicator ("Scanning page 3 of 12...")
-- Store OCR results so re-reading the same PDF doesn't re-scan
-- Security: Tesseract.js runs entirely client-side, no data leaves the browser
-- Bundle size consideration: Tesseract.js core is ~2MB + language data ~4MB for English. May need to lazy-load language data.
+### Priority 1: Configure Auth0 + Test Login (IMMEDIATE)
+Auth0 code is implemented but the Auth0 dashboard needs setup. Once configured:
+- Test login/logout flow
+- Verify session restore on service worker wake
+- Fix any issues that arise
 
-### Priority 2: Premium Voice Integration (HIGH)
-System voices aren't good enough to sell. Research and integrate at least one cloud voice provider:
-- **ElevenLabs** (recommended — best quality, $5/mo starter)
-- **Play.ht** (natural voices, pay-per-use)
-- **Google Cloud TTS** (reliable, pay-per-use)
-- **Azure Neural Voices** (high quality, pay-per-use)
-- **Live Kit** (Users top pick because it's free)
+### Priority 2: Stripe Payments Integration (HIGH)
+Set up the $8/month subscription with 7-day free trial:
+- **Netlify Functions backend** (same repo as landing page):
+  - `netlify/functions/create-checkout.js` — creates Stripe Checkout sessions
+  - `netlify/functions/stripe-webhook.js` — receives subscription events
+  - Stores subscription status on Auth0 user profile (via Auth0 Management API)
+- **Extension changes**:
+  - `getAuthState()` returns subscription status from Auth0 profile
+  - Feature gating: lock AI features after trial expires
+  - "Subscribe" button in popup when trial expired
+- **Landing page**:
+  - Connect CTA buttons to Stripe Checkout
+  - "Start Your Free Trial" → creates checkout session → redirects to Stripe
 
-Requirements:
-- User selects "Premium Voices" as a voice category in settings
-- Voice preview/sample before committing
-- Text sent to voice API must be disclosed in privacy policy
-- Add as Tier 4 or as an option within existing tier system
-- Streaming audio playback (don't wait for full generation)
-- Keep word tracking working with premium voices (need timing data from API)
-- Graceful fallback to system voices if API is down
-- Privacy: update privacy policy and welcome page to disclose cloud voice usage
+### Priority 3: Premium Voice Integration (HIGH)
+System voices aren't good enough to sell. Research and integrate cloud voice provider:
+- **ElevenLabs**, **Play.ht**, **Google Cloud TTS**, **Azure Neural Voices**, or **LiveKit** (free)
+- Streaming audio playback, word tracking compatibility, graceful fallback
 
-### Priority 3: Google Docs + Word Online Support (HIGH)
-These are essential for students and professionals with dyslexia. Investigate and implement:
-- **Google Docs**: explore accessibility tree (`role="textbox"`, ARIA nodes), or use clipboard-based extraction, or Google Docs API
-- **Word Online**: similar approach — accessibility tree or clipboard extraction
-- May need additional permissions in manifest
-- Detect these apps and offer an alternative reading flow if standard selection doesn't work
-- At minimum: make Alt+S + TTS work on selected text even if word tracking doesn't
+### Priority 4: Google Docs + Word Online Support (HIGH)
+Essential for students and professionals with dyslexia:
+- Explore accessibility tree, clipboard-based extraction, or APIs
+- At minimum: make Alt+S + TTS work on selected text
 
-### Priority 4: Landing Page for Promotion (MEDIUM)
-I need a standalone landing page (NOT the welcome.html inside the extension) that I can host publicly to promote PageSpeak. This should be:
-- A single `index.html` file (with inline CSS or a separate CSS file) that can be hosted on GitHub Pages, Netlify, or Vercel
-- Professional design — hero section, feature highlights, privacy tier comparison, security badges, testimonials section (placeholder), pricing section, download/install CTA
-- Mobile responsive
-- Fast loading (no heavy frameworks)
-- SEO optimized (meta tags, Open Graph, Twitter cards)
-- Create in a separate `landing/` directory in the repo so it doesn't interfere with the extension
-- Accessibility-first design (WCAG 2.1 AA compliant — this is a dyslexia tool, the landing page must be accessible)
-
-### Priority 5: Social Media / Launch Content (MEDIUM)
-Create promotional content I can use to announce PageSpeak:
-- `landing/launch-post.md` — a launch announcement post suitable for LinkedIn, Twitter/X, Reddit, Product Hunt. Multiple versions:
-  - Short version (280 chars for Twitter/X)
-  - Medium version (LinkedIn post, 500-800 words)
-  - Long version (Product Hunt / blog post, 1000-1500 words)
-- Key messaging points:
-  - Dyslexia-first, not an afterthought
-  - 3 privacy tiers — you choose what data leaves your computer
-  - Free core features, no subscription required for reading
-  - 8 security layers
-  - Open source
-  - AI comprehension that actually helps you understand what you read
-  - Works on PDFs, SPAs (claude.ai, ChatGPT), and regular websites
-
-  ### Priority 6: Favicon
-  Create a great favicon to represent the brand using the colors and style of the tool. 
-  - add in all the sizes that are needed for that and the .ico as well
+### Priority 5: OCR for Scanned PDFs (MEDIUM)
+Integrate Tesseract.js for PDFs without text layers:
+- Client-side only, progress indicator, cached results
+- Bundle size: ~6MB total, may need lazy-loading
 
 ---
 
