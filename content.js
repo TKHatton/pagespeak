@@ -9,11 +9,38 @@
 // Debug: confirm content script loaded (visible in page's DevTools console)
 console.info('PageSpeak content script loaded on:', window.location.href);
 
+/**
+ * Check if the extension context is still valid.
+ * After extension reload/update, chrome.runtime becomes undefined
+ * on pages that still have the old content script running.
+ */
+function isExtensionContextValid() {
+  try {
+    return !!(chrome && chrome.runtime && chrome.runtime.id);
+  } catch (e) {
+    return false;
+  }
+}
+
+/**
+ * Safe wrapper for chrome.runtime.sendMessage.
+ * Silently fails if the extension context has been invalidated.
+ */
+function safeSendMessage(message, callback) {
+  if (!isExtensionContextValid()) return;
+  try {
+    chrome.runtime.sendMessage(message, callback);
+  } catch (e) {
+    // Extension context invalidated — page needs a refresh
+  }
+}
+
 // --- Keep-alive port connection ---
 let keepAlivePort = null;
 
 function connectKeepAlive() {
   if (keepAlivePort) return;
+  if (!isExtensionContextValid()) return;
   try {
     keepAlivePort = chrome.runtime.connect({ name: 'pagespeak-keepalive' });
     keepAlivePort.onDisconnect.addListener(() => {
@@ -547,20 +574,20 @@ function onFloatingBtnClick() {
 
   if (!text) return;
 
-  chrome.runtime.sendMessage({ type: 'START_READING', text });
+  safeSendMessage({ type: 'START_READING', text });
   showControlBar();
 }
 
 function onPauseClick() {
-  chrome.runtime.sendMessage({ type: 'PAUSE_READING' });
+  safeSendMessage({ type: 'PAUSE_READING' });
 }
 
 function onResumeClick() {
-  chrome.runtime.sendMessage({ type: 'RESUME_READING' });
+  safeSendMessage({ type: 'RESUME_READING' });
 }
 
 function onStopClick() {
-  chrome.runtime.sendMessage({ type: 'STOP_READING' });
+  safeSendMessage({ type: 'STOP_READING' });
   hideControlBar();
 }
 
@@ -571,7 +598,7 @@ function onSpeedClick() {
   const nextIndex = (currentIndex + 1) % SPEED_CYCLE.length;
   currentSpeed = SPEED_CYCLE[nextIndex];
 
-  chrome.runtime.sendMessage({
+  safeSendMessage({
     type: 'UPDATE_SETTINGS',
     settings: { speed: currentSpeed },
   });
@@ -671,7 +698,7 @@ document.addEventListener('scroll', () => {
 // ============================================================
 // Message Listener — responds to service worker messages
 // ============================================================
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+if (isExtensionContextValid()) chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   // Error boundary: wrap entire handler so one feature failure doesn't crash others
   try {
     return handleMessage(message, sender, sendResponse);
@@ -903,6 +930,7 @@ function applyPageFont(fontFamily) {
     document.head.appendChild(pageFontStyleEl);
   }
 
+  if (!isExtensionContextValid()) return;
   const fontUrl = chrome.runtime.getURL('fonts/' + getFontFile(fontFamily));
 
   pageFontStyleEl.textContent = `
@@ -1026,8 +1054,8 @@ function removeColorOverlay() {
 // Load & Sync All Settings
 // ============================================================
 
-chrome.runtime.sendMessage({ type: 'GET_SETTINGS' }, (response) => {
-  if (chrome.runtime.lastError || !response || !response.settings) return;
+safeSendMessage({ type: 'GET_SETTINGS' }, (response) => {
+  if (!response || !response.settings) return;
   const s = response.settings;
   if (s.speed) currentSpeed = s.speed;
   if (s.highlightEnabled !== undefined) highlightEnabled = s.highlightEnabled;
@@ -1318,13 +1346,13 @@ function getFloatingStyles() {
         banner.setAttribute('role', 'button');
         banner.setAttribute('tabindex', '0');
         banner.addEventListener('click', () => {
-          chrome.runtime.sendMessage({ type: 'OPEN_PDF_READER', url: url });
+          safeSendMessage({ type: 'OPEN_PDF_READER', url: url });
           banner.remove();
         });
         banner.addEventListener('keydown', (e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            chrome.runtime.sendMessage({ type: 'OPEN_PDF_READER', url: url });
+            safeSendMessage({ type: 'OPEN_PDF_READER', url: url });
             banner.remove();
           }
         });
