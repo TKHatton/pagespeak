@@ -6,6 +6,9 @@
 // keep-alive port, service worker messaging, input sanitization
 // ============================================================
 
+// Debug: confirm content script loaded (visible in page's DevTools console)
+console.info('PageSpeak content script loaded on:', window.location.href);
+
 // --- Keep-alive port connection ---
 let keepAlivePort = null;
 

@@ -63,6 +63,18 @@
     .tier-local { background: #e3f2fd; color: #1565c0; }
     .tier-cloud { background: #fce4ec; color: #c62828; }
 
+    /* Limitations / Coming Soon */
+    .limitations-box {
+      padding: 20px; background: #fff8e1; border-radius: 10px;
+      border: 1px solid #ffe082; margin-bottom: 16px;
+    }
+    .limitations-box h2 { font-size: 16px; color: #f57f17; margin-bottom: 8px; }
+    .limitations-box p { font-size: 13px; color: #666; margin-bottom: 10px; }
+    .limitations-box ul { list-style: none; padding: 0; }
+    .limitations-box li { font-size: 13px; color: #555; padding: 4px 0; padding-left: 20px; position: relative; }
+    .limitations-box li::before { content: '\2022'; position: absolute; left: 4px; color: #f57f17; font-weight: 700; }
+    .limitations-box strong { color: #333; }
+
     /* Security callout */
     .security-box {
       padding: 20px; background: #e0f2f1; border-radius: 10px;
@@ -186,6 +198,17 @@
           <span class="tier-badge tier-cloud">API Key Required</span>
         </div>
       </div>
+    </div>
+
+    <div class="limitations-box">
+      <h2>Coming Soon</h2>
+      <p>PageSpeak works on most websites and PDFs. These platforms use custom rendering that we're working on supporting:</p>
+      <ul>
+        <li><strong>Google Docs</strong> — uses a custom canvas renderer. Partial support only. We're building a dedicated extractor.</li>
+        <li><strong>Microsoft Word Online</strong> — similar custom rendering. Full support planned for a future update.</li>
+        <li><strong>Kindle Cloud Reader</strong> — uses obfuscated font rendering that no TTS extension can currently read.</li>
+        <li><strong>Scanned PDFs</strong> — PDFs that are images (no text layer) require OCR, which is planned for a future version.</li>
+      </ul>
     </div>
 
     <div class="security-box">
